@@ -98,7 +98,7 @@ export function useVirtualOffice() {
   const [events, setEvents] = useState<OfficeEvent[]>([]);
   const [currentTime, setCurrentTime] = useState<TimeOfDay>('day');
   const [coffeeBoost, setCoffeeBoost] = useState<CoffeeBoost>({ active: false, multiplier: 1.5, expiresAt: null });
-  const [sprintGoals, setSprintGoals] = useState<SprintGoal[]>(DEFAULT_SPRINT_GOALS);
+  const [sprintGoals] = useState<SprintGoal[]>(DEFAULT_SPRINT_GOALS);
   const [leaderboard, setLeaderboard] = useState<{ daily: LeaderboardEntry[]; weekly: LeaderboardEntry[]; monthly: LeaderboardEntry[] }>({
     daily: [],
     weekly: [],
@@ -110,7 +110,6 @@ export function useVirtualOffice() {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showWhiteboard, setShowWhiteboard] = useState(false);
   
-  const wsRef = useRef<WebSocket | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
   // Calculate time of day based on real time
