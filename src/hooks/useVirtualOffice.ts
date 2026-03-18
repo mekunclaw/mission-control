@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   Agent, AgentRole, AnimationState, OfficeZone, TimeOfDay, AgentStats,
   ChatMessage, OfficeEvent, CoffeeBoost, SprintGoal, LeaderboardEntry,
-  VirtualOfficeState, LEVEL_THRESHOLDS, XP_REWARDS, BADGE_DEFINITIONS,
+  LEVEL_THRESHOLDS, XP_REWARDS, BADGE_DEFINITIONS,
   Badge, Position
 } from '@/types/virtual-office';
 
