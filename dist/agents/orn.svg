@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- ORN - QA-REVIEWER Agent: Inspector with magnifying glass -->
+  <defs>
+    <style>
+      .pixel { shape-rendering: crispEdges; }
+    </style>
+  </defs>
+  
+  <!-- Background -->
+  <rect x="0" y="0" width="64" height="64" fill="#1a1a2e"/>
+  
+  <!-- Hair -->
+  <rect x="14" y="6" width="36" height="8" fill="#5d4037" class="pixel"/>
+  <rect x="12" y="10" width="4" height="8" fill="#5d4037" class="pixel"/>
+  <rect x="48" y="10" width="4" height="8" fill="#5d4037" class="pixel"/>
+  
+  <!-- Face/Head -->
+  <rect x="16" y="12" width="32" height="24" fill="#fdbf60" class="pixel"/>
+  
+  <!-- Glasses (Inspector style) -->
+  <rect x="18" y="18" width="12" height="8" fill="#1a1a2e" class="pixel"/>
+  <rect x="34" y="18" width="12" height="8" fill="#1a1a2e" class="pixel"/>
+  <rect x="30" y="20" width="4" height="2" fill="#1a1a2e" class="pixel"/>
+  <rect x="20" y="20" width="8" height="4" fill="#fff" class="pixel"/>
+  <rect x="36" y="20" width="8" height="4" fill="#fff" class="pixel"/>
+  
+  <!-- Serious mouth -->
+  <rect x="26" y="30" width="12" height="2" fill="#1a1a2e" class="pixel"/>
+  
+  <!-- Body (Inspector coat - gray) -->
+  <rect x="12" y="36" width="40" height="28" fill="#78909c" class="pixel"/>
+  
+  <!-- Shirt and tie -->
+  <rect x="24" y="36" width="16" height="12" fill="#fff" class="pixel"/>
+  <rect x="28" y="36" width="8" height="16" fill="#e94560" class="pixel"/>
+  
+  <!-- Magnifying Glass (held in right hand) -->
+  <!-- Handle -->
+  <rect x="50" y="44" width="4" height="16" fill="#5d4037" class="pixel"/>
+  <!-- Frame -->
+  <rect x="44" y="32" width="16" height="4" fill="#ffc107" class="pixel"/>
+  <rect x="44" y="48" width="16" height="4" fill="#ffc107" class="pixel"/>
+  <rect x="40" y="36" width="4" height="12" fill="#ffc107" class="pixel"/>
+  <rect x="60" y="36" width="4" height="12" fill="#ffc107" class="pixel"/>
+  <!-- Glass -->
+  <rect x="46" y="38" width="12" height="8" fill="#81d4fa" opacity="0.6" class="pixel"/>
+  
+  <!-- Left hand -->
+  <rect x="8" y="44" width="8" height="12" fill="#fdbf60" class="pixel"/>
+  
+  <!-- Badge -->
+  <rect x="16" y="44" width="8" height="8" fill="#ffc107" class="pixel"/>
+  <rect x="18" y="46" width="4" height="4" fill="#1a1a2e" class="pixel"/>
+</svg>

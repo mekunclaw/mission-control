@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- GM - Manager Agent: Manager with tie and briefcase -->
+  <defs>
+    <style>
+      .pixel { shape-rendering: crispEdges; }
+    </style>
+  </defs>
+  
+  <!-- Background -->
+  <rect x="0" y="0" width="64" height="64" fill="#1a1a2e"/>
+  
+  <!-- Hair (Slicked back) -->
+  <rect x="14" y="4" width="36" height="10" fill="#3e2723" class="pixel"/>
+  <rect x="12" y="8" width="4" height="6" fill="#3e2723" class="pixel"/>
+  <rect x="48" y="8" width="4" height="6" fill="#3e2723" class="pixel"/>
+  
+  <!-- Face/Head -->
+  <rect x="16" y="12" width="32" height="24" fill="#fdbf60" class="pixel"/>
+  
+  <!-- Eyes (confident) -->
+  <rect x="22" y="18" width="6" height="4" fill="#1a1a2e" class="pixel"/>
+  <rect x="36" y="18" width="6" height="4" fill="#1a1a2e" class="pixel"/>
+  
+  <!-- Smile (confident) -->
+  <rect x="24" y="28" width="16" height="4" fill="#1a1a2e" class="pixel"/>
+  <rect x="22" y="26" width="4" height="4" fill="#1a1a2e" class="pixel"/>
+  <rect x="38" y="26" width="4" height="4" fill="#1a1a2e" class="pixel"/>
+  
+  <!-- Suit (Dark blue) -->
+  <rect x="12" y="36" width="40" height="28" fill="#1a237e" class="pixel"/>
+  
+  <!-- White shirt -->
+  <rect x="24" y="36" width="16" height="14" fill="#fff" class="pixel"/>
+  
+  <!-- Tie (Red) -->
+  <rect x="28" y="36" width="8" height="20" fill="#e94560" class="pixel"/>
+  <rect x="26" y="34" width="12" height="4" fill="#e94560" class="pixel"/>
+  
+  <!-- Briefcase (held in right hand) -->
+  <rect x="48" y="40" width="12" height="20" fill="#5d4037" class="pixel"/>
+  <rect x="52" y="36" width="4" height="6" fill="#5d4037" class="pixel"/>
+  <!-- Handle -->
+  <rect x="54" y="34" width="4" height="4" fill="#8d6e63" class="pixel"/>
+  <!-- Latch -->
+  <rect x="52" y="48" width="4" height="4" fill="#ffc107" class="pixel"/>
+  
+  <!-- Left hand -->
+  <rect x="8" y="44" width="8" height="12" fill="#fdbf60" class="pixel"/>
+  
+  <!-- Pocket square -->
+  <rect x="40" y="40" width="8" height="6" fill="#fff" class="pixel"/>
+</svg>
