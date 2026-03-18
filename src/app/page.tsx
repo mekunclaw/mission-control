@@ -12,6 +12,8 @@ import {
   fetchIssues, 
   fetchAllProjectData, 
   fetchAllOpenPRs,
+} from '@/lib/github-client';
+import {
   processDashboardData, 
   calculateCrossProjectWorkload,
   filterIssues,
