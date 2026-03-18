@@ -18,7 +18,7 @@ const ANIMATION_FRAMES: Record<AnimationState, string[]> = {
 };
 
 export default function AgentAvatar({ agent, stats, onClick, onHighFive }: AgentAvatarProps) {
-  const [frameIndex, setFrameIndex] = useState(0);
+  const [, setFrameIndex] = useState(0);
   const [showSpeechBubble, setShowSpeechBubble] = useState(false);
   const [bubbleText, setBubbleText] = useState('');
 

@@ -5,10 +5,10 @@ import { useState } from 'react';
 
 interface MeetingRoomProps {
   position: Position;
-  onEnter: () => void;
+  _onEnter: () => void;
 }
 
-export default function MeetingRoom({ position, onEnter }: MeetingRoomProps) {
+export default function MeetingRoom({ position, _onEnter }: MeetingRoomProps) {
   const [showStandup, setShowStandup] = useState(false);
   const [participants] = useState(['dev', 'qa-reviewer']);
 
