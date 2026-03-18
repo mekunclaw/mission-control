@@ -51,7 +51,6 @@ export interface ProjectData {
 }
 
 const OWNER = 'mekunclaw';
-const REPO = 'mission-control';
 
 // List of projects to fetch issues from
 const PROJECTS = ['mission-control', 'card-buff', 'shelf-count'];
