@@ -31,8 +31,6 @@ const agentConfig: Record<AgentRole, { name: string; icon: string; color: string
 };
 
 export default function AgentBreakdown({ agentIssues, selectedAgent, onSelectAgent }: AgentBreakdownProps) {
-  const totalIssues = agentIssues.reduce((sum, a) => sum + a.count, 0);
-
   return (
     <div className="nes-container is-dark with-title mb-6">
       <p className="title">👥 Agent Workload</p>
