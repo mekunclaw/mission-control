@@ -3,14 +3,24 @@
 import React from 'react';
 import { GitHubIssue } from '@/lib/github';
 
-interface IssueListProps {
-  issues: GitHubIssue[];
-  title: string;
-}
+// Label color definitions with high contrast
+export const LABEL_COLORS: Record<string, { bg: string; text: string }> = {
+  'priority:high': { bg: '#dc3545', text: '#ffffff' },
+  'priority:medium': { bg: '#ffc107', text: '#000000' },
+  'priority:low': { bg: '#6c757d', text: '#ffffff' },
+  'status:ready-for-dev': { bg: '#28a745', text: '#ffffff' },
+  'status:in-progress': { bg: '#007bff', text: '#ffffff' },
+  'status:blocked': { bg: '#dc3545', text: '#ffffff' },
+  'status:verified': { bg: '#17a2b8', text: '#ffffff' },
+  'status:spec-review': { bg: '#6f42c1', text: '#ffffff' },
+  'role:dev': { bg: '#6f42c1', text: '#ffffff' },
+  'role:qa-reviewer': { bg: '#20c997', text: '#000000' },
+  'role:gm': { bg: '#fd7e14', text: '#000000' },
+};
 
 function getStatusBadgeColor(labels: GitHubIssue['labels']): string {
   if (labels.some(l => l.name === 'status:blocked')) return 'is-error';
-  if (labels.some(l => l.name === 'status:in-progress')) return 'is-warning';
+  if (labels.some(l => l.name === 'status:in-progress')) return 'is-primary';
   if (labels.some(l => l.name === 'status:ready-for-dev' || l.name === 'ready-dev')) return 'is-success';
   if (labels.some(l => l.name === 'status:verified')) return 'is-primary';
   return 'is-dark';
