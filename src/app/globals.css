@@ -3,25 +3,111 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #1a1a2e;
+  --foreground: #eee;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Press Start 2P', monospace, Arial, Helvetica, sans-serif;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* NES.css overrides for better integration */
+.nes-container {
+  background-color: #16213e;
+  border-color: #0f3460;
+}
+
+.nes-container.is-dark {
+  background-color: #0f3460;
+  border-color: #e94560;
+}
+
+.nes-container.is-dark.with-title > .title {
+  background-color: #0f3460;
+  color: #eee;
+}
+
+.nes-btn {
+  border-color: #e94560;
+  color: #eee;
+}
+
+.nes-btn.is-primary {
+  background-color: #e94560;
+}
+
+.nes-btn.is-success {
+  background-color: #4ecca3;
+  color: #1a1a2e;
+}
+
+.nes-btn.is-warning {
+  background-color: #ffc107;
+  color: #1a1a2e;
+}
+
+.nes-btn.is-error {
+  background-color: #ff6b6b;
+}
+
+.nes-progress {
+  border-color: #0f3460;
+}
+
+.nes-progress.is-success {
+  background-color: #4ecca3;
+}
+
+/* Custom scrollbar for pixel art feel */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #16213e;
+  border: 2px solid #0f3460;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e94560;
+  border: 2px solid #0f3460;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff6b6b;
+}
+
+/* Animation for loading states */
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s infinite;
+}
+
+/* Ensure pixelated images */
+img {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Link styles */
+a {
+  color: #4ecca3;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #7ee8c7;
+}
+
+/* Selection color */
+::selection {
+  background-color: #e94560;
+  color: #fff;
 }
