@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { FilterState, AgentRole, StatusFilter, PriorityFilter, ProjectData } from '@/lib/github';
+import { LABEL_COLORS } from './IssueList';
 
 interface FilterBarProps {
   filters: FilterState;
@@ -11,25 +12,25 @@ interface FilterBarProps {
 
 const statusOptions: { value: StatusFilter; label: string; color: string }[] = [
   { value: 'all', label: 'All Status', color: '#9e9e9e' },
-  { value: 'ready-for-dev', label: 'Ready for Dev', color: '#4ecca3' },
-  { value: 'in-progress', label: 'In Progress', color: '#ffc107' },
-  { value: 'blocked', label: 'Blocked', color: '#ff6b6b' },
-  { value: 'verified', label: 'Verified', color: '#2196f3' },
-  { value: 'spec-review', label: 'Spec Review', color: '#9c27b0' },
+  { value: 'ready-for-dev', label: 'Ready for Dev', color: LABEL_COLORS['status:ready-for-dev'].bg },
+  { value: 'in-progress', label: 'In Progress', color: LABEL_COLORS['status:in-progress'].bg },
+  { value: 'blocked', label: 'Blocked', color: LABEL_COLORS['status:blocked'].bg },
+  { value: 'verified', label: 'Verified', color: LABEL_COLORS['status:verified'].bg },
+  { value: 'spec-review', label: 'Spec Review', color: LABEL_COLORS['status:spec-review'].bg },
 ];
 
-const priorityOptions: { value: PriorityFilter; label: string }[] = [
-  { value: 'all', label: 'All Priorities' },
-  { value: 'high', label: '🔥 High' },
-  { value: 'medium', label: '⚡ Medium' },
-  { value: 'low', label: '📌 Low' },
+const priorityOptions: { value: PriorityFilter; label: string; bg: string; text: string }[] = [
+  { value: 'all', label: 'All Priorities', bg: '#9e9e9e', text: '#ffffff' },
+  { value: 'high', label: '🔥 High', bg: LABEL_COLORS['priority:high'].bg, text: LABEL_COLORS['priority:high'].text },
+  { value: 'medium', label: '⚡ Medium', bg: LABEL_COLORS['priority:medium'].bg, text: LABEL_COLORS['priority:medium'].text },
+  { value: 'low', label: '📌 Low', bg: LABEL_COLORS['priority:low'].bg, text: LABEL_COLORS['priority:low'].text },
 ];
 
-const agentOptions: { value: AgentRole | 'all'; label: string; icon: string }[] = [
-  { value: 'all', label: 'All Agents', icon: '👥' },
-  { value: 'dev', label: 'WUT (DEV)', icon: '/agents/wut.svg' },
-  { value: 'qa-reviewer', label: 'ORN (QA)', icon: '/agents/orn.svg' },
-  { value: 'gm', label: 'GM', icon: '/agents/gm.svg' },
+const agentOptions: { value: AgentRole | 'all'; label: string; icon: string; bg: string; text: string }[] = [
+  { value: 'all', label: 'All Agents', icon: '👥', bg: '#9e9e9e', text: '#ffffff' },
+  { value: 'dev', label: 'WUT (DEV)', icon: '/agents/wut.svg', bg: LABEL_COLORS['role:dev'].bg, text: LABEL_COLORS['role:dev'].text },
+  { value: 'qa-reviewer', label: 'ORN (QA)', icon: '/agents/orn.svg', bg: LABEL_COLORS['role:qa-reviewer'].bg, text: LABEL_COLORS['role:qa-reviewer'].text },
+  { value: 'gm', label: 'GM', icon: '/agents/gm.svg', bg: LABEL_COLORS['role:gm'].bg, text: LABEL_COLORS['role:gm'].text },
 ];
 
 export default function FilterBar({ filters, onFilterChange, projects }: FilterBarProps) {
@@ -43,10 +44,6 @@ export default function FilterBar({ filters, onFilterChange, projects }: FilterB
 
   const handleStatusChange = (status: StatusFilter) => {
     onFilterChange({ ...filters, status });
-  };
-
-  const handlePriorityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onFilterChange({ ...filters, priority: e.target.value as PriorityFilter });
   };
 
   const clearFilters = () => {
@@ -93,6 +90,11 @@ export default function FilterBar({ filters, onFilterChange, projects }: FilterB
                   filters.agent === option.value ? 'is-primary' : ''
                 }`}
                 title={option.label}
+                style={filters.agent !== option.value && option.value !== 'all' ? {
+                  backgroundColor: option.bg,
+                  color: option.text,
+                  borderColor: option.bg,
+                } : undefined}
               >
                 {option.value === 'all' ? (
                   option.icon
@@ -135,14 +137,23 @@ export default function FilterBar({ filters, onFilterChange, projects }: FilterB
         {/* Priority Dropdown */}
         <div className="flex flex-col gap-2">
           <label className="text-sm text-gray-400">Priority</label>
-          <div className="nes-select">
-            <select value={filters.priority} onChange={handlePriorityChange}>
-              {priorityOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+          <div className="flex gap-2 flex-wrap">
+            {priorityOptions.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => onFilterChange({ ...filters, priority: option.value })}
+                className={`nes-btn text-xs ${
+                  filters.priority === option.value ? 'is-primary' : ''
+                }`}
+                style={filters.priority !== option.value && option.value !== 'all' ? {
+                  backgroundColor: option.bg,
+                  color: option.text,
+                  borderColor: option.bg,
+                } : undefined}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>

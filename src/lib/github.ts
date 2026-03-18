@@ -15,6 +15,7 @@ export interface GitHubIssue {
   updated_at: string;
   html_url: string;
   body: string | null;
+  project?: string;
 }
 
 export interface GitHubRepo {
@@ -52,24 +53,40 @@ export interface ProjectData {
 const OWNER = 'mekunclaw';
 const REPO = 'mission-control';
 
+// List of projects to fetch issues from
+const PROJECTS = ['mission-control', 'card-buff', 'shelf-count'];
+
 export async function fetchIssues(): Promise<GitHubIssue[]> {
   try {
-    const response = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/issues?state=all&per_page=100`,
-      {
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-        },
-        next: { revalidate: 30 },
+    // Fetch issues from all projects
+    const issuesPromises = PROJECTS.map(async (project) => {
+      const response = await fetch(
+        `https://api.github.com/repos/${OWNER}/${project}/issues?state=all&per_page=100`,
+        {
+          headers: {
+            'Accept': 'application/vnd.github.v3+json',
+          },
+          next: { revalidate: 30 },
+        }
+      );
+
+      if (!response.ok) {
+        console.warn(`Failed to fetch issues for ${project}: ${response.status}`);
+        return [];
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(`GitHub API error: ${response.status}`);
-    }
+      const issues: GitHubIssue[] = await response.json();
+      // Add project info to each issue
+      return issues.map(issue => ({
+        ...issue,
+        project: project,
+      }));
+    });
 
-    const issues: GitHubIssue[] = await response.json();
-    return issues.filter(issue => !issue.labels.some(label => label.name === 'duplicate'));
+    const allIssuesArrays = await Promise.all(issuesPromises);
+    const allIssues = allIssuesArrays.flat();
+    
+    return allIssues.filter(issue => !issue.labels.some(label => label.name === 'duplicate'));
   } catch (error) {
     console.error('Failed to fetch issues:', error);
     return [];
@@ -78,22 +95,28 @@ export async function fetchIssues(): Promise<GitHubIssue[]> {
 
 export async function fetchRepos(): Promise<GitHubRepo[]> {
   try {
-    const response = await fetch(
-      `https://api.github.com/users/${OWNER}/repos?per_page=100`,
-      {
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-        },
-        next: { revalidate: 60 },
+    // Fetch specific projects instead of all repos
+    const repoPromises = PROJECTS.map(async (project) => {
+      const response = await fetch(
+        `https://api.github.com/repos/${OWNER}/${project}`,
+        {
+          headers: {
+            'Accept': 'application/vnd.github.v3+json',
+          },
+          next: { revalidate: 60 },
+        }
+      );
+
+      if (!response.ok) {
+        console.warn(`Failed to fetch repo ${project}: ${response.status}`);
+        return null;
       }
-    );
 
-    if (!response.ok) {
-      throw new Error(`GitHub API error: ${response.status}`);
-    }
+      return response.json();
+    });
 
-    const repos: GitHubRepo[] = await response.json();
-    return repos;
+    const repos = await Promise.all(repoPromises);
+    return repos.filter((repo): repo is GitHubRepo => repo !== null);
   } catch (error) {
     console.error('Failed to fetch repos:', error);
     return [];
@@ -215,6 +238,11 @@ export interface FilterState {
 
 export function filterIssues(issues: GitHubIssue[], filters: FilterState): GitHubIssue[] {
   return issues.filter(issue => {
+    // Filter by project
+    if (filters.project !== 'all' && issue.project !== filters.project) {
+      return false;
+    }
+
     // Filter by agent role
     if (filters.agent !== 'all') {
       const roleLabel = `role:${filters.agent}`;

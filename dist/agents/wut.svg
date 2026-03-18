@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- WUT - DEV Agent: Builder with wrench and hard hat -->
+  <defs>
+    <style>
+      .pixel { shape-rendering: crispEdges; }
+    </style>
+  </defs>
+  
+  <!-- Background -->
+  <rect x="0" y="0" width="64" height="64" fill="#1a1a2e"/>
+  
+  <!-- Hard Hat (Yellow) -->
+  <rect x="16" y="4" width="32" height="8" fill="#ffc107" class="pixel"/>
+  <rect x="12" y="8" width="40" height="4" fill="#ffc107" class="pixel"/>
+  <rect x="20" y="2" width="24" height="4" fill="#ffc107" class="pixel"/>
+  
+  <!-- Face/Head -->
+  <rect x="16" y="12" width="32" height="24" fill="#fdbf60" class="pixel"/>
+  
+  <!-- Eyes -->
+  <rect x="22" y="18" width="6" height="6" fill="#1a1a2e" class="pixel"/>
+  <rect x="36" y="18" width="6" height="6" fill="#1a1a2e" class="pixel"/>
+  <rect x="24" y="20" width="2" height="2" fill="#fff" class="pixel"/>
+  <rect x="38" y="20" width="2" height="2" fill="#fff" class="pixel"/>
+  
+  <!-- Smile -->
+  <rect x="26" y="28" width="12" height="4" fill="#1a1a2e" class="pixel"/>
+  <rect x="24" y="26" width="4" height="4" fill="#1a1a2e" class="pixel"/>
+  <rect x="36" y="26" width="4" height="4" fill="#1a1a2e" class="pixel"/>
+  
+  <!-- Body (Blue overalls) -->
+  <rect x="12" y="36" width="40" height="28" fill="#2196f3" class="pixel"/>
+  
+  <!-- Shirt underneath -->
+  <rect x="20" y="36" width="24" height="8" fill="#fff" class="pixel"/>
+  
+  <!-- Wrench (held in right hand) -->
+  <rect x="48" y="32" width="8" height="16" fill="#9e9e9e" class="pixel"/>
+  <rect x="44" y="28" width="16" height="8" fill="#9e9e9e" class="pixel"/>
+  <rect x="44" y="24" width="6" height="6" fill="#9e9e9e" class="pixel"/>
+  <rect x="54" y="24" width="6" height="6" fill="#9e9e9e" class="pixel"/>
+  
+  <!-- Left hand -->
+  <rect x="8" y="44" width="8" height="12" fill="#fdbf60" class="pixel"/>
+  
+  <!-- Belt -->
+  <rect x="12" y="52" width="40" height="4" fill="#5d4037" class="pixel"/>
+  <rect x="28" y="52" width="8" height="4" fill="#ffc107" class="pixel"/>
+</svg>
