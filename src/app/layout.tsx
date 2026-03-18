@@ -1,25 +1,20 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import 'nes.css/css/nes.min.css'
-
-const inter = Inter({ subsets: ['latin'] })
+import type { Metadata } from 'next';
+import './globals.css';
+import 'nes.css/css/nes.min.css';
 
 export const metadata: Metadata = {
   title: 'Mission Control',
   description: 'Agent Workforce Dashboard',
-}
+};
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} nes-container is-dark`}>
-        {children}
-      </body>
+      <body className="min-h-screen bg-pixel-dark">{children}</body>
     </html>
-  )
+  );
 }
