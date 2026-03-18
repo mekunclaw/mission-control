@@ -1,4 +1,4 @@
-import { GitHubIssue, GitHubPR, GitHubRepo } from './github';
+import { GitHubIssue, GitHubPR, GitHubRepo, ProjectData } from './github';
 export * from './github';
 
 // Client-side fetch functions that use the API route
@@ -116,5 +116,3 @@ export async function fetchAllProjectData(): Promise<ProjectData[]> {
     return [];
   }
 }
-
-import { ProjectData } from './github';
