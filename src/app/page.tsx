@@ -1,24 +1,89 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import StatusCard from '@/components/StatusCard';
 import IssueList from '@/components/IssueList';
 import ActivityFeed from '@/components/ActivityFeed';
-import { fetchIssues, processDashboardData, GitHubIssue, DashboardData } from '@/lib/github';
+import ProjectOverview from '@/components/ProjectOverview';
+import AgentBreakdown from '@/components/AgentBreakdown';
+import FilterBar from '@/components/FilterBar';
+import { 
+  fetchIssues, 
+  fetchAllProjectData, 
+  processDashboardData, 
+  groupIssuesByAgent,
+  filterIssues,
+  GitHubIssue, 
+  DashboardData,
+  ProjectData,
+  AgentRole,
+  StatusFilter,
+  PriorityFilter,
+  FilterState,
+} from '@/lib/github';
 
-export default function Dashboard() {
+// URL param helpers
+function filtersToParams(filters: FilterState): URLSearchParams {
+  const params = new URLSearchParams();
+  if (filters.project !== 'all') params.set('project', filters.project);
+  if (filters.agent !== 'all') params.set('agent', filters.agent);
+  if (filters.status !== 'all') params.set('status', filters.status);
+  if (filters.priority !== 'all') params.set('priority', filters.priority);
+  return params;
+}
+
+function paramsToFilters(searchParams: URLSearchParams): FilterState {
+  return {
+    project: searchParams.get('project') || 'all',
+    agent: (searchParams.get('agent') as AgentRole | 'all') || 'all',
+    status: (searchParams.get('status') as StatusFilter) || 'all',
+    priority: (searchParams.get('priority') as PriorityFilter) || 'all',
+  };
+}
+
+function DashboardContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // State
   const [issues, setIssues] = useState<GitHubIssue[]>([]);
+  const [projects, setProjects] = useState<ProjectData[]>([]);
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // Filters from URL
+  const [filters, setFilters] = useState<FilterState>(() => paramsToFilters(searchParams));
 
+  // Update URL when filters change
+  const updateFilters = useCallback((newFilters: FilterState) => {
+    setFilters(newFilters);
+    const params = filtersToParams(newFilters);
+    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+    router.replace(newUrl, { scroll: false });
+  }, [pathname, router]);
+
+  // Sync filters with URL on mount
+  useEffect(() => {
+    setFilters(paramsToFilters(searchParams));
+  }, [searchParams]);
+
+  // Load data
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const fetchedIssues = await fetchIssues();
+      
+      const [fetchedIssues, fetchedProjects] = await Promise.all([
+        fetchIssues(),
+        fetchAllProjectData(),
+      ]);
+      
       setIssues(fetchedIssues);
+      setProjects(fetchedProjects);
       setData(processDashboardData(fetchedIssues));
       setLastUpdated(new Date());
     } catch (err) {
@@ -42,7 +107,12 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [loadData]);
 
-  const openIssues = issues.filter(i => i.state === 'open');
+  // Filtered issues
+  const filteredIssues = filterIssues(issues, filters);
+  const agentIssues = groupIssuesByAgent(filteredIssues);
+
+  // Stats for filtered view
+  const openIssues = filteredIssues.filter(i => i.state === 'open');
   const inProgressIssues = openIssues.filter(i => 
     i.labels.some(l => l.name === 'status:in-progress')
   );
@@ -52,6 +122,16 @@ export default function Dashboard() {
   const readyIssues = openIssues.filter(i => 
     i.labels.some(l => l.name === 'status:ready-for-dev' || l.name === 'ready-dev')
   );
+
+  // Handle project selection
+  const handleSelectProject = (project: string) => {
+    updateFilters({ ...filters, project: filters.project === project ? 'all' : project });
+  };
+
+  // Handle agent selection
+  const handleSelectAgent = (agent: AgentRole | 'all') => {
+    updateFilters({ ...filters, agent });
+  };
 
   return (
     <div className="min-h-screen p-4 md:p-8">
@@ -99,6 +179,27 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Project Overview */}
+      <ProjectOverview 
+        projects={projects}
+        selectedProject={filters.project}
+        onSelectProject={handleSelectProject}
+      />
+
+      {/* Agent Breakdown */}
+      <AgentBreakdown
+        agentIssues={agentIssues}
+        selectedAgent={filters.agent}
+        onSelectAgent={handleSelectAgent}
+      />
+
+      {/* Filter Bar */}
+      <FilterBar
+        filters={filters}
+        onFilterChange={updateFilters}
+        projects={projects}
+      />
+
       {/* Status Overview Cards */}
       {data && (
         <section className="mb-8">
@@ -129,6 +230,18 @@ export default function Dashboard() {
             />
           </div>
         </section>
+      )}
+
+      {/* Filtered Results Count */}
+      {(filters.project !== 'all' || filters.agent !== 'all' || 
+        filters.status !== 'all' || filters.priority !== 'all') && (
+        <div className="nes-container is-dark mb-6">
+          <p className="text-center">
+            Showing <span className="text-green-400 font-bold">{filteredIssues.length}</span> issues 
+            {filters.project !== 'all' && <span> in <span className="text-yellow-400">{filters.project}</span></span>}
+            {filters.agent !== 'all' && <span> for <span className="text-blue-400">{filters.agent}</span></span>}
+          </p>
+        </div>
       )}
 
       {/* Main Content Grid */}
@@ -172,7 +285,7 @@ export default function Dashboard() {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <ActivityFeed issues={issues} />
+          <ActivityFeed issues={filteredIssues} />
           
           {/* Quick Stats */}
           {data && (
@@ -228,5 +341,27 @@ export default function Dashboard() {
         </div>
       </footer>
     </div>
+  );
+}
+
+// Loading fallback
+function DashboardLoading() {
+  return (
+    <div className="min-h-screen p-4 md:p-8 flex items-center justify-center">
+      <div className="nes-container is-dark text-center">
+        <p className="text-xl">Loading Dashboard...</p>
+        <div className="mt-4">
+          <i className="nes-icon coin is-large animate"></i>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardContent />
+    </Suspense>
   );
 }

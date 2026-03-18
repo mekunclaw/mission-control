@@ -17,6 +17,23 @@ export interface GitHubIssue {
   body: string | null;
 }
 
+export interface GitHubRepo {
+  id: number;
+  name: string;
+  description: string | null;
+  html_url: string;
+  open_issues_count: number;
+}
+
+export interface GitHubPR {
+  id: number;
+  number: number;
+  title: string;
+  state: 'open' | 'closed';
+  html_url: string;
+  created_at: string;
+}
+
 export interface DashboardData {
   totalIssues: number;
   openIssues: number;
@@ -25,6 +42,11 @@ export interface DashboardData {
   blockers: number;
   readyForDev: number;
   recentIssues: GitHubIssue[];
+}
+
+export interface ProjectData {
+  repo: GitHubRepo;
+  openPRs: number;
 }
 
 const OWNER = 'mekunclaw';
@@ -50,6 +72,74 @@ export async function fetchIssues(): Promise<GitHubIssue[]> {
     return issues.filter(issue => !issue.labels.some(label => label.name === 'duplicate'));
   } catch (error) {
     console.error('Failed to fetch issues:', error);
+    return [];
+  }
+}
+
+export async function fetchRepos(): Promise<GitHubRepo[]> {
+  try {
+    const response = await fetch(
+      `https://api.github.com/users/${OWNER}/repos?per_page=100`,
+      {
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+        },
+        next: { revalidate: 60 },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status}`);
+    }
+
+    const repos: GitHubRepo[] = await response.json();
+    return repos;
+  } catch (error) {
+    console.error('Failed to fetch repos:', error);
+    return [];
+  }
+}
+
+export async function fetchOpenPRs(repoName: string): Promise<GitHubPR[]> {
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/${OWNER}/${repoName}/pulls?state=open&per_page=100`,
+      {
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+        },
+        next: { revalidate: 30 },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status}`);
+    }
+
+    const prs: GitHubPR[] = await response.json();
+    return prs;
+  } catch (error) {
+    console.error(`Failed to fetch PRs for ${repoName}:`, error);
+    return [];
+  }
+}
+
+export async function fetchAllProjectData(): Promise<ProjectData[]> {
+  try {
+    const repos = await fetchRepos();
+    const projectData: ProjectData[] = [];
+
+    for (const repo of repos) {
+      const prs = await fetchOpenPRs(repo.name);
+      projectData.push({
+        repo,
+        openPRs: prs.length,
+      });
+    }
+
+    return projectData;
+  } catch (error) {
+    console.error('Failed to fetch project data:', error);
     return [];
   }
 }
@@ -83,4 +173,87 @@ export function processDashboardData(issues: GitHubIssue[]): DashboardData {
     readyForDev,
     recentIssues,
   };
+}
+
+// Agent role types
+export type AgentRole = 'dev' | 'qa-reviewer' | 'gm';
+
+export interface AgentIssues {
+  role: AgentRole;
+  count: number;
+  issues: GitHubIssue[];
+}
+
+export function groupIssuesByAgent(issues: GitHubIssue[]): AgentIssues[] {
+  const devIssues = issues.filter(i => 
+    i.labels.some(l => l.name === 'role:dev')
+  );
+  const qaIssues = issues.filter(i => 
+    i.labels.some(l => l.name === 'role:qa-reviewer')
+  );
+  const gmIssues = issues.filter(i => 
+    i.labels.some(l => l.name === 'role:gm')
+  );
+
+  return [
+    { role: 'dev', count: devIssues.length, issues: devIssues },
+    { role: 'qa-reviewer', count: qaIssues.length, issues: qaIssues },
+    { role: 'gm', count: gmIssues.length, issues: gmIssues },
+  ];
+}
+
+// Filter types
+export type StatusFilter = 'all' | 'ready-for-dev' | 'in-progress' | 'blocked' | 'verified' | 'spec-review';
+export type PriorityFilter = 'all' | 'high' | 'medium' | 'low';
+
+export interface FilterState {
+  project: string;
+  agent: AgentRole | 'all';
+  status: StatusFilter;
+  priority: PriorityFilter;
+}
+
+export function filterIssues(issues: GitHubIssue[], filters: FilterState): GitHubIssue[] {
+  return issues.filter(issue => {
+    // Filter by agent role
+    if (filters.agent !== 'all') {
+      const roleLabel = `role:${filters.agent}`;
+      if (!issue.labels.some(l => l.name === roleLabel)) {
+        return false;
+      }
+    }
+
+    // Filter by status
+    if (filters.status !== 'all') {
+      const statusLabels: Record<StatusFilter, string[]> = {
+        'all': [],
+        'ready-for-dev': ['status:ready-for-dev', 'ready-dev'],
+        'in-progress': ['status:in-progress'],
+        'blocked': ['status:blocked'],
+        'verified': ['status:verified'],
+        'spec-review': ['status:spec-review'],
+      };
+      const requiredLabels = statusLabels[filters.status];
+      if (requiredLabels.length > 0 && !issue.labels.some(l => requiredLabels.includes(l.name))) {
+        return false;
+      }
+    }
+
+    // Filter by priority
+    if (filters.priority !== 'all') {
+      const priorityLabel = `priority:${filters.priority}`;
+      if (!issue.labels.some(l => l.name === priorityLabel)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+}
+
+export function getPriorityFromLabels(labels: GitHubIssue['labels']): 'high' | 'medium' | 'low' | null {
+  if (labels.some(l => l.name === 'priority:high')) return 'high';
+  if (labels.some(l => l.name === 'priority:medium')) return 'medium';
+  if (labels.some(l => l.name === 'priority:low')) return 'low';
+  return null;
 }
