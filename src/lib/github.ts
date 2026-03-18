@@ -16,6 +16,9 @@ export interface GitHubIssue {
   html_url: string;
   body: string | null;
   project?: string;
+  pull_request?: {
+    url: string;
+  };
 }
 
 export interface GitHubRepo {
@@ -66,14 +69,39 @@ export interface ProjectData {
 const OWNER = 'mekunclaw';
 
 // List of projects to fetch issues from
-const PROJECTS = ['mission-control', 'card-buff', 'shelf-count'];
+export const PROJECTS = ['mission-control', 'card-buff', 'shelf-count'];
 
-export async function fetchIssues(): Promise<GitHubIssue[]> {
+// Project metadata
+export const PROJECT_METADATA: Record<string, { 
+  name: string; 
+  description: string;
+  color: string;
+}> = {
+  'mission-control': {
+    name: 'Mission Control',
+    description: 'Agent Workforce Dashboard',
+    color: '#6366f1',
+  },
+  'card-buff': {
+    name: 'Card Buff',
+    description: 'LINE Credit Card Privileges',
+    color: '#10b981',
+  },
+  'shelf-count': {
+    name: 'Shelf Count',
+    description: 'Product Detection',
+    color: '#f59e0b',
+  },
+};
+
+export async function fetchIssues(project?: string): Promise<GitHubIssue[]> {
   try {
+    const projectsToFetch = project ? [project] : PROJECTS;
+    
     // Fetch issues from all projects
-    const issuesPromises = PROJECTS.map(async (project) => {
+    const issuesPromises = projectsToFetch.map(async (projectName) => {
       const response = await fetch(
-        `https://api.github.com/repos/${OWNER}/${project}/issues?state=all&per_page=100`,
+        `https://api.github.com/repos/${OWNER}/${projectName}/issues?state=all&per_page=100`,
         {
           headers: {
             'Accept': 'application/vnd.github.v3+json',
@@ -83,15 +111,17 @@ export async function fetchIssues(): Promise<GitHubIssue[]> {
       );
 
       if (!response.ok) {
-        console.warn(`Failed to fetch issues for ${project}: ${response.status}`);
+        console.warn(`Failed to fetch issues for ${projectName}: ${response.status}`);
         return [];
       }
 
       const issues: GitHubIssue[] = await response.json();
+      // Filter out pull requests (they appear as issues in GitHub API)
+      const filteredIssues = issues.filter(issue => !issue.pull_request);
       // Add project info to each issue
-      return issues.map(issue => ({
+      return filteredIssues.map(issue => ({
         ...issue,
-        project: project,
+        project: projectName,
       }));
     });
 
