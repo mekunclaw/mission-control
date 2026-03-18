@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { FilterState, AgentRole, StatusFilter, PriorityFilter, ProjectData } from '@/lib/github';
+import { FilterState, AgentRole, StatusFilter, PriorityFilter, PhaseFilter, ProjectData } from '@/lib/github';
 import { LABEL_COLORS } from './IssueList';
 
 interface FilterBarProps {
@@ -17,6 +17,7 @@ const statusOptions: { value: StatusFilter; label: string; color: string }[] = [
   { value: 'blocked', label: 'Blocked', color: LABEL_COLORS['status:blocked'].bg },
   { value: 'verified', label: 'Verified', color: LABEL_COLORS['status:verified'].bg },
   { value: 'spec-review', label: 'Spec Review', color: LABEL_COLORS['status:spec-review'].bg },
+  { value: 'ready-for-test', label: 'Ready for Test', color: LABEL_COLORS['status:ready-for-test'].bg },
 ];
 
 const priorityOptions: { value: PriorityFilter; label: string; bg: string; text: string }[] = [
@@ -24,6 +25,13 @@ const priorityOptions: { value: PriorityFilter; label: string; bg: string; text:
   { value: 'high', label: '🔥 High', bg: LABEL_COLORS['priority:high'].bg, text: LABEL_COLORS['priority:high'].text },
   { value: 'medium', label: '⚡ Medium', bg: LABEL_COLORS['priority:medium'].bg, text: LABEL_COLORS['priority:medium'].text },
   { value: 'low', label: '📌 Low', bg: LABEL_COLORS['priority:low'].bg, text: LABEL_COLORS['priority:low'].text },
+];
+
+const phaseOptions: { value: PhaseFilter; label: string; color: string }[] = [
+  { value: 'all', label: 'All Phases', color: '#9e9e9e' },
+  { value: 'phase-1', label: '🚀 Phase 1', color: '#3b82f6' },
+  { value: 'phase-2', label: '⭐ Phase 2', color: '#8b5cf6' },
+  { value: 'phase-3', label: '👑 Phase 3', color: '#f59e0b' },
 ];
 
 const agentOptions: { value: AgentRole | 'all'; label: string; icon: string; bg: string; text: string }[] = [
@@ -46,23 +54,29 @@ export default function FilterBar({ filters, onFilterChange, projects }: FilterB
     onFilterChange({ ...filters, status });
   };
 
+  const handlePhaseChange = (phase: PhaseFilter) => {
+    onFilterChange({ ...filters, phase });
+  };
+
   const clearFilters = () => {
     onFilterChange({
       project: 'all',
       agent: 'all',
       status: 'all',
       priority: 'all',
+      phase: 'all',
     });
   };
 
   const hasActiveFilters = filters.project !== 'all' || filters.agent !== 'all' || 
-                          filters.status !== 'all' || filters.priority !== 'all';
+                          filters.status !== 'all' || filters.priority !== 'all' ||
+                          filters.phase !== 'all';
 
   return (
     <div className="nes-container is-dark with-title mb-6">
       <p className="title">🔍 Filters</p>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Project Dropdown */}
         <div className="flex flex-col gap-2">
           <label className="text-sm text-gray-400">Project</label>
@@ -126,6 +140,27 @@ export default function FilterBar({ filters, onFilterChange, projects }: FilterB
                 }`}
                 style={{
                   borderColor: filters.status === option.value ? undefined : option.color,
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Phase Pills */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm text-gray-400">Phase</label>
+          <div className="flex gap-2 flex-wrap">
+            {phaseOptions.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => handlePhaseChange(option.value)}
+                className={`nes-btn text-xs ${
+                  filters.phase === option.value ? 'is-primary' : ''
+                }`}
+                style={{
+                  borderColor: filters.phase === option.value ? undefined : option.color,
                 }}
               >
                 {option.label}

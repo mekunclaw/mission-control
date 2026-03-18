@@ -11,16 +11,20 @@ import FilterBar from '@/components/FilterBar';
 import { 
   fetchIssues, 
   fetchAllProjectData, 
+  fetchAllOpenPRs,
   processDashboardData, 
-  groupIssuesByAgent,
+  calculateCrossProjectWorkload,
   filterIssues,
   GitHubIssue, 
   DashboardData,
   ProjectData,
+  GitHubPR,
   AgentRole,
   StatusFilter,
   PriorityFilter,
+  PhaseFilter,
   FilterState,
+  CrossProjectAgentWorkload,
 } from '@/lib/github';
 
 // URL param helpers
@@ -30,6 +34,7 @@ function filtersToParams(filters: FilterState): URLSearchParams {
   if (filters.agent !== 'all') params.set('agent', filters.agent);
   if (filters.status !== 'all') params.set('status', filters.status);
   if (filters.priority !== 'all') params.set('priority', filters.priority);
+  if (filters.phase !== 'all') params.set('phase', filters.phase);
   return params;
 }
 
@@ -39,6 +44,7 @@ function paramsToFilters(searchParams: URLSearchParams): FilterState {
     agent: (searchParams.get('agent') as AgentRole | 'all') || 'all',
     status: (searchParams.get('status') as StatusFilter) || 'all',
     priority: (searchParams.get('priority') as PriorityFilter) || 'all',
+    phase: (searchParams.get('phase') as PhaseFilter) || 'all',
   };
 }
 
@@ -50,7 +56,9 @@ function DashboardContent() {
   // State
   const [issues, setIssues] = useState<GitHubIssue[]>([]);
   const [projects, setProjects] = useState<ProjectData[]>([]);
+  const [prs, setPRs] = useState<GitHubPR[]>([]);
   const [data, setData] = useState<DashboardData | null>(null);
+  const [agentWorkload, setAgentWorkload] = useState<CrossProjectAgentWorkload[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -77,14 +85,17 @@ function DashboardContent() {
       setLoading(true);
       setError(null);
       
-      const [fetchedIssues, fetchedProjects] = await Promise.all([
+      const [fetchedIssues, fetchedProjects, fetchedPRs] = await Promise.all([
         fetchIssues(),
         fetchAllProjectData(),
+        fetchAllOpenPRs(),
       ]);
       
       setIssues(fetchedIssues);
       setProjects(fetchedProjects);
+      setPRs(fetchedPRs);
       setData(processDashboardData(fetchedIssues));
+      setAgentWorkload(calculateCrossProjectWorkload(fetchedIssues, fetchedPRs));
       setLastUpdated(new Date());
     } catch (err) {
       setError('Failed to load dashboard data');
@@ -98,18 +109,17 @@ function DashboardContent() {
     loadData();
   }, [loadData]);
 
-  // Auto-refresh every 30 seconds
+  // Auto-refresh every 5 minutes (300000ms) as per requirements
   useEffect(() => {
     const interval = setInterval(() => {
       loadData();
-    }, 30000);
+    }, 300000);
 
     return () => clearInterval(interval);
   }, [loadData]);
 
   // Filtered issues
   const filteredIssues = filterIssues(issues, filters);
-  const agentIssues = groupIssuesByAgent(filteredIssues);
 
   // Stats for filtered view
   const openIssues = filteredIssues.filter(i => i.state === 'open');
@@ -121,6 +131,9 @@ function DashboardContent() {
   );
   const readyIssues = openIssues.filter(i => 
     i.labels.some(l => l.name === 'status:ready-for-dev' || l.name === 'ready-dev')
+  );
+  const readyForTestIssues = openIssues.filter(i => 
+    i.labels.some(l => l.name === 'status:ready-for-test')
   );
 
   // Handle project selection
@@ -147,7 +160,7 @@ function DashboardContent() {
                   Agent Workforce Dashboard
                 </h1>
                 <p className="text-sm text-gray-400 mt-1">
-                  mekunclaw/mission-control
+                  Cross-Project Command Center
                 </p>
               </div>
             </div>
@@ -192,9 +205,9 @@ function DashboardContent() {
         onSelectProject={handleSelectProject}
       />
 
-      {/* Agent Breakdown */}
+      {/* Cross-Project Agent Workload */}
       <AgentBreakdown
-        agentIssues={agentIssues}
+        agentWorkload={agentWorkload}
         selectedAgent={filters.agent}
         onSelectAgent={handleSelectAgent}
       />
@@ -209,7 +222,7 @@ function DashboardContent() {
       {/* Status Overview Cards */}
       {data && (
         <section className="mb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <StatusCard
               title="Active Work"
               count={data.activeWork}
@@ -229,6 +242,12 @@ function DashboardContent() {
               color="success"
             />
             <StatusCard
+              title="Ready for Test"
+              count={readyForTestIssues.length}
+              icon="check"
+              color="primary"
+            />
+            <StatusCard
               title="Total Open"
               count={data.openIssues}
               icon="star"
@@ -240,12 +259,14 @@ function DashboardContent() {
 
       {/* Filtered Results Count */}
       {(filters.project !== 'all' || filters.agent !== 'all' || 
-        filters.status !== 'all' || filters.priority !== 'all') && (
+        filters.status !== 'all' || filters.priority !== 'all' ||
+        filters.phase !== 'all') && (
         <div className="nes-container is-dark mb-6">
           <p className="text-center">
             Showing <span className="text-green-400 font-bold">{filteredIssues.length}</span> issues 
             {filters.project !== 'all' && <span> in <span className="text-yellow-400">{filters.project}</span></span>}
             {filters.agent !== 'all' && <span> for <span className="text-blue-400">{filters.agent}</span></span>}
+            {filters.phase !== 'all' && <span> in <span className="text-purple-400">{filters.phase.replace('-', ' ')}</span></span>}
           </p>
         </div>
       )}
@@ -258,6 +279,7 @@ function DashboardContent() {
             <IssueList
               issues={inProgressIssues}
               title="🎮 In Progress"
+              showProjectBadge={true}
             />
           )}
           
@@ -265,6 +287,7 @@ function DashboardContent() {
             <IssueList
               issues={blockedIssues}
               title="🚫 Blocked"
+              showProjectBadge={true}
             />
           )}
           
@@ -272,13 +295,23 @@ function DashboardContent() {
             <IssueList
               issues={readyIssues}
               title="✅ Ready for Dev"
+              showProjectBadge={true}
+            />
+          )}
+          
+          {readyForTestIssues.length > 0 && (
+            <IssueList
+              issues={readyForTestIssues}
+              title="🧪 Ready for Test"
+              showProjectBadge={true}
             />
           )}
           
           {openIssues.length > 0 && (
             <IssueList
-              issues={openIssues.slice(0, 10)}
+              issues={openIssues.slice(0, 15)}
               title="📋 All Open Issues"
+              showProjectBadge={true}
             />
           )}
           
@@ -310,6 +343,10 @@ function DashboardContent() {
                   <span>Closed:</span>
                   <span className="font-bold text-gray-400">{data.closedIssues}</span>
                 </div>
+                <div className="flex justify-between">
+                  <span>Open PRs:</span>
+                  <span className="font-bold text-blue-400">{prs.length}</span>
+                </div>
                 <div className="mt-4">
                   <progress 
                     className="nes-progress is-success" 
@@ -332,7 +369,7 @@ function DashboardContent() {
       <footer className="mt-12 text-center">
         <div className="nes-container is-dark">
           <p className="text-sm text-gray-500">
-            Mission Control Dashboard • Auto-refreshes every 30 seconds
+            Mission Control Dashboard • Auto-refreshes every 5 minutes
           </p>
           <div className="flex justify-center gap-4 mt-4">
             <a 

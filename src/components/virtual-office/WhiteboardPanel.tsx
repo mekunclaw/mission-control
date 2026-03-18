@@ -62,8 +62,7 @@ export default function WhiteboardPanel({ goals, onClose }: WhiteboardPanelProps
                 key={goal.id}
                 className={`nes-container is-rounded border-2 ${getStatusColor(goal.status)}`}
               >
-                <div className="flex justify-between items-start mb-2"
-003e
+                <div className="flex justify-between items-start mb-2">
                   <div>
                     <h4 className="font-bold text-lg">{goal.title}</h4>
                     <p className="text-sm opacity-80">{goal.description}</p>
