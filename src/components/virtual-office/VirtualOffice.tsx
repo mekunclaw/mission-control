@@ -1,7 +1,7 @@
 'use client';
 
 import { useVirtualOffice } from '@/hooks/useVirtualOffice';
-import { OfficeZone, AgentRole, TimeOfDay } from '@/types/virtual-office';
+import { AgentRole, TimeOfDay } from '@/types/virtual-office';
 import AgentAvatar from './AgentAvatar';
 import OfficeElement from './OfficeElement';
 import ChatPanel from './ChatPanel';
@@ -10,11 +10,11 @@ import WhiteboardPanel from './WhiteboardPanel';
 import AgentStatsModal from './AgentStatsModal';
 import CoffeeMachine from './CoffeeMachine';
 import MeetingRoom from './MeetingRoom';
-import { useState } from 'react';
+// import { useState } from 'react';
 
 export default function VirtualOffice() {
   const office = useVirtualOffice();
-  const [hoveredZone, setHoveredZone] = useState<OfficeZone | null>(null);
+  // const [hoveredZone, setHoveredZone] = useState<OfficeZone | null>(null); // Reserved for future use
 
   if (!office.mounted) {
     return (
@@ -176,7 +176,6 @@ export default function VirtualOffice() {
             {/* Meeting Room Table */}
             <MeetingRoom 
               position={{ x: 450, y: 180 }}
-              onEnter={() => console.log('Entered meeting room')}
             />
 
             {/* Animated Elements */}
