@@ -157,6 +157,12 @@ function DashboardContent() {
                   Last updated: {lastUpdated.toLocaleTimeString()}
                 </span>
               )}
+              <a
+                href="/virtual-office"
+                className="nes-btn is-warning"
+              >
+                🏢 Virtual Office
+              </a>
               <button
                 onClick={loadData}
                 disabled={loading}
