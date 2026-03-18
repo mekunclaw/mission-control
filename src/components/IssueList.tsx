@@ -3,6 +3,11 @@
 import React from 'react';
 import { GitHubIssue } from '@/lib/github';
 
+interface IssueListProps {
+  issues: GitHubIssue[];
+  title: string;
+}
+
 // Label color definitions with high contrast
 export const LABEL_COLORS: Record<string, { bg: string; text: string }> = {
   'priority:high': { bg: '#dc3545', text: '#ffffff' },
