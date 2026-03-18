@@ -14,7 +14,6 @@ import { useState } from 'react';
 
 export default function VirtualOffice() {
   const office = useVirtualOffice();
-  const [hoveredZone, setHoveredZone] = useState<OfficeZone | null>(null);
 
   if (!office.mounted) {
     return (
@@ -176,7 +175,7 @@ export default function VirtualOffice() {
             {/* Meeting Room Table */}
             <MeetingRoom 
               position={{ x: 450, y: 180 }}
-              onEnter={() => console.log('Entered meeting room')}
+              _onEnter={() => console.log('Entered meeting room')}
             />
 
             {/* Animated Elements */}

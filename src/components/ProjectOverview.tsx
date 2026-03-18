@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ProjectData, PROJECT_METADATA, GitHubIssue, GitHubPR } from '@/lib/github';
+import { ProjectData, PROJECT_METADATA, GitHubIssue } from '@/lib/github';
 
 interface ProjectOverviewProps {
   projects: ProjectData[];
