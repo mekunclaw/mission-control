@@ -1,9 +1,14 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Press_Start_2P } from 'next/font/google'
 import './globals.css'
 import 'nes.css/css/nes.min.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const pressStart2P = Press_Start_2P({
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-pixel',
+})
 
 export const metadata: Metadata = {
   title: 'Mission Control',
@@ -16,8 +21,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} nes-container is-dark`}>
+    <html lang="en" className={pressStart2P.variable}>
+      <body className="bg-gray-900 text-white min-h-screen">
         {children}
       </body>
     </html>
